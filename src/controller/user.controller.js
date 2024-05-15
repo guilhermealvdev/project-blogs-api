@@ -16,4 +16,11 @@ async function userFunction(req, res) {
   return res.status(201).json({ token });
 }
 
-module.exports = { userFunction };
+async function getAllUsers(req, res) {
+  const users = await User.findAll({
+    attributes: ['id', 'displayName', 'email', 'image'],
+  });
+  return res.status(200).json(users);
+}
+
+module.exports = { userFunction, getAllUsers };
