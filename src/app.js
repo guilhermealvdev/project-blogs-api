@@ -2,6 +2,7 @@ const express = require('express');
 const loginController = require('./controller/login.controller');
 const userController = require('./controller/user.controller');
 const categoriesController = require('./controller/categories.controller');
+const postController = require('./controller/post.controller');
 const { validarLogin } = require('./middleware/validador');
 const authMiddleware = require('./middleware/authMIddleware');
 // ...
@@ -32,4 +33,5 @@ app.post('/categories', authMiddleware, categoriesController.createCategory);
 
 app.get('/categories', authMiddleware, categoriesController.getCategories);
 
+app.post('/post', authMiddleware, postController.createPost);
 module.exports = app;
