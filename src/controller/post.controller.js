@@ -1,50 +1,52 @@
-const { BlogPost, PostCategory, Category, sequelize } = require('../models');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
+const { BlogPost, PostCategory, Category } = require('../models');
 
-async function createPost(req, res) {
-  const { title, content, categoryIds } = req.body;
-  const token = req.headers.authorization?.split(' ')[1];
-
+const verificacoesAlv = async (title, content, categoryIds) => {
   if (!title || !content || !categoryIds) {
-    return res.status(400).json({ message: 'Some required fields are missing' });
+    throw new Error('Some required fields are missing');
   }
 
+  const categories = await Category.findAll({ where: { id: categoryIds } });
+  if (categories.length !== categoryIds.length) {
+    throw new Error('one or more "categoryIds" not found');
+  }
+};
+
+const criarNovoPostAlv = async (title, content, categoryIds, userId) => {
+  const newPost = await BlogPost.create({
+    title, content, userId, updated: new Date(), published: new Date(),
+  });
+
+  await PostCategory.bulkCreate(categoryIds.map((categoryId) => ({
+    postId: newPost.id,
+    categoryId,
+  })));
+
+  return {
+    id: newPost.id,
+    title: newPost.title,
+    content: newPost.content,
+    userId: newPost.userId,
+    updated: newPost.updated,
+    published: newPost.published,
+  };
+};
+
+const createPost = async (req, res) => {
+  const { title, content, categoryIds } = req.body;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-
-    // Verificar se todas as categorias existem
-    const categories = await Category.findAll({ where: { id: categoryIds } });
-    if (categories.length !== categoryIds.length) {
-      return res.status(400).json({ message: 'one or more "categoryIds" not found' });
+    await verificacoesAlv(title, content, categoryIds);
+    
+    const userId = req.user.id;
+    const obj = await criarNovoPostAlv(title, content, categoryIds, userId);
+    
+    // Verifica se o objeto foi criado com sucesso antes de retornar
+    if (obj) {
+      return res.status(201).json(obj);
     }
-
-    // Usando transação para garantir atomicidade
-    const result = await sequelize.transaction(async (t) => {
-      const newPost = await BlogPost.create(
-        { title, content, userId, published: new Date(), updated: new Date() },
-        { transaction: t }
-      );
-
-      const postCategories = categoryIds.map((categoryId) => ({
-        postId: newPost.id,
-        categoryId,
-      }));
-
-      await PostCategory.bulkCreate(postCategories, { transaction: t });
-
-      return newPost;
-    });
-
-    return res.status(201).json(result);
-
   } catch (error) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Expired or invalid token' });
-    }
-    console.error(error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(400).json({ message: error.message });
   }
-}
+};
 
 module.exports = { createPost };
