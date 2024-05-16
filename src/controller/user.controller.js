@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-const { param } = require('../app');
 
 async function userFunction(req, res) {
   const { displayName, email, password } = req.body;
