@@ -25,4 +25,6 @@ app.post('/user', validarLogin, userController.userFunction);
 
 app.get('/user', authMiddleware, userController.getAllUsers);
 
+app.get('/user/:id', authMiddleware, userController.getUserId);
+
 module.exports = app;

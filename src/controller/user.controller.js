@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const { param } = require('../app');
 
 async function userFunction(req, res) {
   const { displayName, email, password } = req.body;
@@ -23,4 +24,18 @@ async function getAllUsers(req, res) {
   return res.status(200).json(users);
 }
 
-module.exports = { userFunction, getAllUsers };
+async function getUserId(req, res) {
+  const { id } = req.params;
+  const selectedUser = await User.findOne({
+    where: { id },
+    attributes: ['id', 'displayName', 'email', 'image'],
+  });
+
+  if (!selectedUser) {
+    return res.status(404).json({ message: 'User does not exist' });
+  }
+
+  return res.status(200).json(selectedUser);
+}
+
+module.exports = { userFunction, getAllUsers, getUserId };
