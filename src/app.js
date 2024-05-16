@@ -1,6 +1,7 @@
 const express = require('express');
 const loginController = require('./controller/login.controller');
 const userController = require('./controller/user.controller');
+const categoriesController = require('./controller/categories.controller');
 const { validarLogin } = require('./middleware/validador');
 const authMiddleware = require('./middleware/authMIddleware');
 // ...
@@ -26,5 +27,7 @@ app.post('/user', validarLogin, userController.userFunction);
 app.get('/user', authMiddleware, userController.getAllUsers);
 
 app.get('/user/:id', authMiddleware, userController.getUserId);
+
+app.post('/categories', authMiddleware, categoriesController.createCategory);
 
 module.exports = app;
