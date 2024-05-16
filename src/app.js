@@ -4,6 +4,7 @@ const userController = require('./controller/user.controller');
 const categoriesController = require('./controller/categories.controller');
 const postController = require('./controller/post.controller');
 const secondPostController = require('./controller/secondPost.controller');
+const thirdPostController = require('./controller/thirdPost.controller');
 const { validarLogin } = require('./middleware/validador');
 const authMiddleware = require('./middleware/authMIddleware');
 // ...
@@ -37,5 +38,9 @@ app.get('/categories', authMiddleware, categoriesController.getCategories);
 app.post('/post', authMiddleware, postController.createPost);
 
 app.get('/post', authMiddleware, secondPostController.getAllPosts);
+
+app.get('/post/:id', authMiddleware, secondPostController.getPostById);
+
+app.put('/post/:id', authMiddleware, thirdPostController.updatePostById);
 
 module.exports = app;
