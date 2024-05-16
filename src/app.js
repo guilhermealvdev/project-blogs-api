@@ -30,4 +30,6 @@ app.get('/user/:id', authMiddleware, userController.getUserId);
 
 app.post('/categories', authMiddleware, categoriesController.createCategory);
 
+app.get('/categories', authMiddleware, categoriesController.getCategories);
+
 module.exports = app;

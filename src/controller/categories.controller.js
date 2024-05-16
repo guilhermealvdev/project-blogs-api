@@ -9,4 +9,12 @@ async function createCategory(req, res) {
   return res.status(201).json(newCategory);
 }
 
-module.exports = { createCategory };
+async function getCategories(req, res) {
+  const categorias = await Category.findAll({
+    attributes: ['id', 'name'],
+  });
+  // Não é preciso parametros no findAll, testei sem nada e passou tb
+  return res.status(200).json(categorias);
+}
+
+module.exports = { createCategory, getCategories };
